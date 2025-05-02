@@ -3,9 +3,11 @@ import { performance } from "node:perf_hooks";
 import { interval, intervalToDuration } from "date-fns";
 import { appendFile, stat, mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { GRAPHQL_PATH } from "./constants.js";
+import { makeGraphQLRequest } from "./client.js";
 
-const GRAPHQL_ENDPOINT = new URL("/index.php?graphql&queryId=test-query", env.WORDPRESS_URL);
-const LOG_FILE = `${new Date().toISOString()}_${GRAPHQL_ENDPOINT.host.replaceAll(
+const GRAPHQL_URL = new URL(GRAPHQL_PATH, env.WORDPRESS_URL);
+const LOG_FILE = `${new Date().toISOString()}_${GRAPHQL_URL.host.replaceAll(
 	".",
 	"-"
 )}_cache-test.csv`;
@@ -14,7 +16,6 @@ const RUN_TIME = Number(env.RUN_TIME) <= 0 ? Infinity : Number(env.RUN_TIME); //
 const INTERVAL = Number(env.INTERVAL) <= 0 ? 1 : Number(env.INTERVAL); // seconds
 const start_time = performance.now();
 
-let count = 1;
 let last_hit_count = 1;
 let last_hit_count_reset_handled = false;
 let last_hit_count_reset_time;
@@ -32,7 +33,7 @@ function getCFCacheHeader(headers) {
 
 function getTTL(header) {
 	if (!header) {
-		return "--";
+		return undefined;
 	}
 	const ttl = header.match(GET_MAX_AGE);
 
@@ -121,18 +122,8 @@ function timeSinceLastHit(response) {
 	return Math.abs(timeSince);
 }
 
-async function checkResponse() {
-	const response = await fetch(GRAPHQL_ENDPOINT, {
-		headers: {
-			Accept: "application/json",
-			Agent: "WPESmartCacheTest/0.1",
-			// "X-WPE-No-Cache": "Cause I can", // Uncomment to disable caching on EverCache, this only works with EFPC disabled
-		},
-	});
-
-	if (!response.ok) {
-		console.error("Error:", response.statusText);
-	}
+export async function checkResponse() {
+	const response = await makeGraphQLRequest(GRAPHQL_URL);
 
 	// console.log("Response Headers:", response.headers);
 
@@ -144,12 +135,11 @@ async function checkResponse() {
 	const isEFPCEnabled = isANEnabled && response.headers.get("cf-cache-status") !== "DYNAMIC";
 
 	return {
-		attempt: count++,
 		time_stamp: new Date().toISOString(),
 		data: {
 			"WPGraphQL Smart Cache": {
 				Service: "WordPress",
-				Layer: "Server",
+				Layer: "Application",
 				Enabled: isWPGQLSCEnabled,
 				Status: "--",
 				TTL: getTTL(response.headers.get("x-orig-cache-control")),

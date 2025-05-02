@@ -1,8 +1,13 @@
 {
-	"name": "smart-cache-tests",
+	"name": "wpe-smart-cache-tests",
 	"version": "0.0.1",
 	"description": "",
-	"main": "index.js",
+	"bin": {
+		"wpe-smart-cache-tests": "./cli.js"
+	},
+	"exports": {
+		"wpe-smart-cache-tests": "./index.js"
+	},
 	"type": "module",
 	"scripts": {
 		"start": "node --env-file=.env index.js",
@@ -17,6 +22,7 @@
 		"nodemon": "^3.1.10"
 	},
 	"dependencies": {
+		"commander": "^13.1.0",
 		"date-fns": "^4.1.0"
 	}
 }
