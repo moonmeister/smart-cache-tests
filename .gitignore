@@ -1,2 +1,9 @@
-logs
+# Package Management
 node_modules
+
+# default log locations
+logs
+
+# env files
+.env*
+!.env*.example
