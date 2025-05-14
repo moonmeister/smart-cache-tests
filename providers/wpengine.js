@@ -1,8 +1,8 @@
-import { getCacheHeaderFactory, headerValueFactory, headerExistsFactory } from "./info.js";
+import { getCacheHeaderFactory, headerValueFactory, headerExistsFactory } from "../actions/info.js";
 
 /**
  * @description Array of services
- * @type {import("./info.js").Service[]}
+ * @type {import("../actions/info.js").Service[]}
  */
 export const services = [
 	{
