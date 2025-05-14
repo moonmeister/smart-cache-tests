@@ -35,7 +35,7 @@ export const services = [
 		getCacheHeader: getCacheHeaderFactory(
 			"Cloudflare-CDN-Cache-Control",
 			"CDN-Cache-Control",
-			"Cache-Control"
+			"Cache-Control",
 		),
 		getAGE: (response) => Number(response.headers.get("age") || 0),
 	},

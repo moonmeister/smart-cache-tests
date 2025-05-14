@@ -127,7 +127,7 @@ function getTimeStamp(response) {
  */
 function getServiceData(
 	response,
-	{ name, service, layer, getEnabled, getStatus, getAGE, getCacheHeader }
+	{ name, service, layer, getEnabled, getStatus, getAGE, getCacheHeader },
 ) {
 	const isEnabled = getEnabled ? getEnabled(response) : false;
 	const cache_header = ifEnabled(getCacheHeader)(response, isEnabled);
