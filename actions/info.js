@@ -1,6 +1,5 @@
-import { Command } from "commander";
-import { getGraphQLURL, makeGraphQLRequest } from "../client.js";
-import { GET_TTL } from "../constants.js";
+import { getGraphQLURL, makeGraphQLRequest } from "../shared/client.js";
+import { GET_TTL } from "../shared/constants.js";
 import { services } from "../providers/wpengine.js";
 import { styleText } from "node:util";
 /**
@@ -163,25 +162,17 @@ export async function getInfo(opts) {
 	};
 }
 
-export default new Command("info")
-	.description("Provides info on the current caching configuration of your WPGraphQL endpoint.")
-	.action(async (options, command) => {
-		console.log(command.parent.opts(), options);
-		const info = await getInfo(command.parent.opts());
+export default async function (_options, command) {
+	const info = await getInfo(command.parent.opts());
 
-		// console.table({
-		// 	"WordPress URL": info.url.origin + info.url.pathname,
-		// 	TimeStamp: new Date(info.time_stamp).toUTCString(),
+	const headingFormat = ["bold", "blue"];
+	console.log("");
+	console.log("------------------------------------");
 
-		// })
-		const headingFormat = ["bold", "blue"];
-		console.log("");
-		console.log("------------------------------------");
+	console.log(styleText(headingFormat, "WordPress URL: "), info.url.origin + info.url.pathname);
+	console.log(styleText(headingFormat, "TimeStamp: "), new Date(info.time_stamp).toUTCString());
+	console.log("------------------------------------");
 
-		console.log(styleText(headingFormat, "WordPress URL: "), info.url.origin + info.url.pathname);
-		console.log(styleText(headingFormat, "TimeStamp: "), new Date(info.time_stamp).toUTCString());
-		console.log("------------------------------------");
-
-		console.table(info.data, ["service", "layer", "enabled", "cache_header", "ttl"]);
-		console.log("");
-	});
+	console.table(info.data, ["service", "layer", "enabled", "cache_header", "ttl"]);
+	console.log("");
+}
