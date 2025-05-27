@@ -1,3 +1,4 @@
+// TODO: Currently not used
 export function parseInt(value) {
 	const num = Number(value);
 

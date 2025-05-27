@@ -3,7 +3,8 @@ import { GRAPHQL_PATH } from "./shared/constants.js";
 import packageInfo from "./package.json" with { type: "json" };
 import infoAction from "./actions/info.js";
 import logAction from "./actions/log.js";
-import { parseUrl, parseInt } from "./shared/parsers.js";
+import { parseUrl } from "./shared/parsers.js";
+import timestring from "timestring";
 
 const program = new Command(packageInfo.name)
 	.version(packageInfo.version)
@@ -25,7 +26,7 @@ const program = new Command(packageInfo.name)
 			.addOption(
 				new Option("-r, --run-time <seconds>", "Run time in seconds")
 					.argParser((value) => {
-						const num = parseInt(value);
+						const num = timestring(value);
 						if (num <= 0) {
 							return Infinity;
 						}
@@ -37,7 +38,7 @@ const program = new Command(packageInfo.name)
 			.addOption(
 				new Option("-i, --interval <seconds>", "Interval between requests in seconds")
 					.argParser((value) => {
-						const num = parseInt(value);
+						const num = timestring(value, "s");
 						if (num < 1) {
 							return 1;
 						}

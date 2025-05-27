@@ -2,21 +2,30 @@ import { performance } from "node:perf_hooks";
 import { appendFile, stat, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { getInfo } from "./info.js";
+import { constantCase } from "change-case";
+import stringifyObject from "stringify-object";
 
 function objectKeysToCsvHeaders(data, prefix = "") {
 	const csvHeaders = Object.keys(data).map((key) => {
-		if (typeof data[key] === "object") {
-			return objectKeysToCsvHeaders(data[key], `${prefix}${key}_`);
+		if (typeof data[key] === "object" && key !== "cache_header") {
+			return objectKeysToCsvHeaders(
+				data[key],
+				`${prefix.toLocaleLowerCase()}_${key.toLocaleLowerCase()}`,
+			);
 		}
-		return (prefix + key).toUpperCase();
+		return constantCase(prefix.toLocaleLowerCase() + "_" + key.toLocaleLowerCase());
 	});
 
 	return csvHeaders.join(",");
 }
 
 function objectValuesToCsvData(data) {
-	const csvData = Object.values(data).map((value) => {
-		if (typeof value === "object") {
+	const csvData = Object.entries(data).map(([key, value]) => {
+		if (typeof value === "object" && key == "cache_header") {
+			return `"${stringifyObject(value, {
+				indent: "",
+			}).replaceAll("\n", "")}"`;
+		} else if (typeof value === "object") {
 			return objectValuesToCsvData(value);
 		}
 		return value;
@@ -26,7 +35,7 @@ function objectValuesToCsvData(data) {
 }
 
 async function logDataToFs(data, LOG_FOLDER, LOG_FILE) {
-	const csvData = objectValuesToCsvData(data) + "\n";
+	const csvData = objectValuesToCsvData([data]) + "\n";
 
 	const log_file_path = join(LOG_FOLDER, LOG_FILE);
 
